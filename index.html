@@ -1,0 +1,747 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>묘네 생탄 가챠</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Jua&family=Gowun+Dodum&display=swap">
+<style>
+  :root{
+    --cream: #fbf3e6;
+    --cream-deep: #f1e2c8;
+    --paper: #fffaf0;
+    --gold: #cf9a52;
+    --gold-deep: #a9793a;
+    --blush: #eec3ce;
+    --ink: #5c4a38;
+    --ink-soft: #93806a;
+    --glass: #211c17;
+    --glass-deep: #14110d;
+
+    --t1: #e3bd63;
+    --t2: #d98fb3;
+    --t3: #8fbfe3;
+    --t4: #8fd6b4;
+    --t5: #cdbd97;
+    --tlast-a: #e0577a;
+    --tlast-b: #e3bd63;
+  }
+
+  *{ box-sizing:border-box; }
+  [hidden]{ display:none !important; }
+  html,body{ height:100%; }
+  body{
+    margin:0;
+    background:
+      radial-gradient(480px 320px at 12% -6%, rgba(255,255,255,0.7), transparent 60%),
+      radial-gradient(420px 300px at 92% 8%, rgba(238,195,206,0.35), transparent 60%),
+      var(--cream);
+    color: var(--ink);
+    font-family: 'Gowun Dodum', 'Apple SD Gothic Neo', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page{ max-width: 600px; margin: 0 auto; padding: 0 16px 56px; }
+
+  /* ---------- setup banner (shown only if firebaseConfig is unfilled) ---------- */
+  .setup-banner{
+    background: #fff3d6; border: 1.5px dashed var(--gold-deep);
+    color: var(--ink); font-size: 12.5px; line-height:1.6;
+    border-radius: 12px; padding: 14px 16px; margin: 16px 0;
+  }
+  .setup-banner code{ background: rgba(0,0,0,0.06); padding: 1px 5px; border-radius: 4px; }
+
+  /* ---------- header ---------- */
+  .poster{
+    position: relative;
+    padding: 40px 20px 34px;
+    text-align:center;
+    overflow: visible;
+  }
+  .poster::before{
+    content:"";
+    position:absolute; left:50%; top:6px; transform:translateX(-50%);
+    width: 320px; height: 220px;
+    background: radial-gradient(circle, rgba(255,242,214,0.9), rgba(255,242,214,0) 70%);
+    pointer-events:none;
+    z-index:0;
+  }
+  .toolbar{
+    position:absolute; top: 14px; right: 12px;
+    display:flex; gap:6px; z-index: 3;
+  }
+  .icon-btn{
+    width: 32px; height:32px; border-radius: 50%;
+    border: 1px solid rgba(169,121,58,0.35);
+    background: var(--paper);
+    color: var(--gold-deep);
+    font-size: 14px;
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow: 0 2px 0 rgba(169,121,58,0.15);
+  }
+  .icon-btn.on{ background: var(--gold); color:#fff8ea; }
+  .icon-btn:focus-visible, .cell:focus-visible, .btn:focus-visible, .lastone-card:focus-visible{
+    outline: 3px solid var(--gold); outline-offset: 2px;
+  }
+
+  .eyebrow{ position:relative; z-index:1; font-size: 11.5px; letter-spacing: 0.16em; color: var(--gold-deep); font-weight:600; }
+  h1{
+    position:relative; z-index:1;
+    font-family:'Do Hyeon', sans-serif;
+    font-size: clamp(1.9rem, 8vw, 2.6rem);
+    margin: 8px 0 6px;
+    color: #fffaf0;
+    -webkit-text-stroke: 5px var(--gold-deep);
+    paint-order: stroke fill;
+    text-shadow: 0 3px 0 rgba(169,121,58,0.35), 0 10px 16px rgba(169,121,58,0.18);
+    text-wrap: balance;
+    letter-spacing: 0.01em;
+  }
+  .subtitle{ position:relative; z-index:1; color: var(--ink-soft); font-size: 13px; margin:0; }
+
+  .mode-row{ position:relative; z-index:1; margin-top: 14px; display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; }
+  .mode-pill{
+    display:inline-flex; align-items:center; gap:5px;
+    background: var(--paper);
+    border: 1px solid rgba(169,121,58,0.3);
+    color: var(--ink-soft);
+    font-size: 11.5px;
+    padding: 5px 12px;
+    border-radius: 999px;
+  }
+  .mode-pill.admin{ background: linear-gradient(120deg, var(--gold), #e3bd63); color: #4a3410; border-color:transparent; font-weight:700; }
+  .link-btn{ background:none; border:none; color: var(--ink-soft); font-size: 11px; text-decoration:underline; cursor:pointer; padding:2px; }
+
+  .login-box{
+    position:relative; z-index:1;
+    max-width: 280px; margin: 12px auto 0;
+    background: var(--paper);
+    border-radius: 14px; padding: 14px;
+    box-shadow: 0 6px 0 rgba(169,121,58,0.12);
+    display:flex; flex-direction:column; gap:8px;
+  }
+  .login-box input{
+    font-family:'Gowun Dodum', sans-serif;
+    border: 1px solid rgba(169,121,58,0.3);
+    border-radius: 8px; padding: 8px 10px; font-size: 13px;
+    background: var(--cream);
+    color: var(--ink);
+  }
+  .login-box .row{ display:flex; gap:6px; }
+  .login-error{ color:#b5473a; font-size: 11px; min-height: 14px; }
+
+  /* ---------- prize table ---------- */
+  .panel{
+    margin-top: 16px;
+    background: var(--paper);
+    border-radius: 18px;
+    padding: 16px 16px 8px;
+    box-shadow: 0 6px 0 rgba(169,121,58,0.1);
+    position:relative; z-index:1;
+  }
+  .panel h2{ font-family:'Jua', sans-serif; font-size: 14px; color: var(--gold-deep); margin: 0 0 10px; }
+  table.prize-table{ width:100%; border-collapse: collapse; margin-bottom: 8px; }
+  .prize-table tr + tr td{ border-top: 1px dashed rgba(169,121,58,0.2); }
+  .prize-table td{ padding: 8px 4px; font-size: 12.5px; vertical-align: middle; }
+  .rank-cell{ display:flex; align-items:center; gap:7px; white-space:nowrap; font-weight:600; }
+  .rank-dot{ width:10px; height:10px; border-radius:50%; flex:none; box-shadow: inset 0 -2px 2px rgba(0,0,0,0.15), inset 0 1px 1px rgba(255,255,255,0.6); }
+  .prize-desc{ color: var(--ink); line-height:1.4; }
+  .remain-cell{ text-align:right; white-space:nowrap; font-variant-numeric: tabular-nums; color: var(--ink-soft); font-size: 12px; }
+  .remain-cell b{ color: var(--gold-deep); font-size: 13.5px; }
+
+  /* ---------- admin controls ---------- */
+  .admin-bar{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin: 16px 2px 4px; position:relative; z-index:1; }
+  .btn{
+    font-family:'Gowun Dodum', sans-serif; font-size: 13px; font-weight:600;
+    border:none; border-radius: 10px; padding: 10px 16px; cursor:pointer;
+    box-shadow: 0 3px 0 rgba(169,121,58,0.25);
+  }
+  .btn:active{ transform: translateY(2px); box-shadow: none; }
+  .btn-primary{ background: linear-gradient(120deg, var(--gold), #e3bd63); color: #4a3410; }
+  .btn-ghost{ background: transparent; color: var(--ink-soft); box-shadow:none; font-size:12px; text-decoration:underline; padding: 6px 4px; }
+  .waiting-note{ color: var(--ink-soft); font-size: 12.5px; margin: 14px 2px; position:relative; z-index:1; }
+
+  /* ---------- board tray ---------- */
+  .board-wrap{
+    margin-top: 16px;
+    background: linear-gradient(160deg, var(--glass), var(--glass-deep));
+    border-radius: 26px;
+    padding: 18px;
+    position: relative; overflow:hidden;
+    box-shadow: inset 0 0 36px rgba(0,0,0,0.4), 0 14px 0 rgba(169,121,58,0.12), 0 20px 30px rgba(20,17,13,0.2);
+    z-index:1;
+  }
+  .board-wrap::before{
+    content:""; position:absolute; inset:0;
+    background: linear-gradient(120deg, rgba(255,255,255,0.09) 0%, transparent 32%);
+    pointer-events:none;
+  }
+  .board{ display:grid; grid-template-columns: repeat(5, 1fr); gap: 10px; position:relative; }
+  .cell{ all: unset; aspect-ratio: 1; cursor:pointer; perspective: 600px; position: relative; }
+  .cell.locked{ cursor:default; }
+  .cell-inner{
+    display:block;
+    position: relative; width:100%; height:100%;
+    transform-style: preserve-3d;
+    transition: transform .5s cubic-bezier(.34,1.56,.64,1);
+  }
+  .cell.revealed .cell-inner{ transform: rotateY(180deg); }
+  .cell.shake .cell-inner{ animation: shake .32s; }
+  @keyframes shake{
+    20%{ transform: translateX(-4px) rotate(-3deg); }
+    60%{ transform: translateX(4px) rotate(3deg); }
+    100%{ transform: translateX(0) rotate(0); }
+  }
+  .face{
+    position:absolute; inset:0; border-radius: 50%; backface-visibility: hidden;
+    display:grid; place-items:center; text-align:center; overflow:hidden;
+  }
+  .face.back{
+    background: radial-gradient(circle at 32% 26%, #fff 0%, rgba(255,255,255,0.55) 22%, #6b6156 55%, #362f27 100%);
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  .face.back .num{
+    font-family:'Gowun Dodum', sans-serif; font-weight:700;
+    font-size: clamp(12px, 3vw, 15px);
+    color: #2c2620;
+    line-height:1;
+  }
+  .face.front{
+    background: radial-gradient(circle at 32% 24%, #fff 0%, rgba(255,255,255,0.7) 16%, var(--tier-color, var(--t5)) 62%, var(--tier-color, var(--t5)) 100%);
+    transform: rotateY(180deg);
+    border: 1px solid rgba(255,255,255,0.55);
+    padding: 4px 5px; gap: 1px;
+  }
+  .face.front .rank{ font-family:'Jua', sans-serif; font-size: clamp(11px, 2.7vw, 13.5px); color: #43331a; line-height:1.1; }
+  .face.front .prize{ font-size: 7px; color: #4a3a20; line-height:1.15; word-break: keep-all; }
+  .cell:not(.locked):not(.revealed):hover .cell-inner{ transform: translateY(-2px) scale(1.06); }
+  .cell.pending{ opacity:.55; pointer-events:none; }
+
+  .burst-dot{
+    position:absolute; left:50%; top:50%; width:6px; height:6px; border-radius:50%;
+    background: var(--tier-color, var(--gold));
+    animation: burstFly .55s ease-out forwards; pointer-events:none;
+  }
+  @keyframes burstFly{ to{ transform: translate(var(--dx), var(--dy)) scale(0); opacity:0; } }
+
+  /* ---------- last one ---------- */
+  .lastone-wrap{ margin-top: 14px; position:relative; z-index:1; }
+  .lastone-card{
+    all:unset; display:block; width:100%; cursor:pointer;
+    border-radius: 18px; padding: 2.5px;
+    background: linear-gradient(120deg, var(--tlast-a), var(--tlast-b), var(--tlast-a));
+    background-size: 220% 220%;
+  }
+  .lastone-card.locked{ cursor:default; }
+  .lastone-inner{
+    background: linear-gradient(160deg, var(--glass), var(--glass-deep));
+    border-radius: 16px; padding: 16px;
+    display:flex; align-items:center; gap:12px;
+  }
+  .lastone-content{ flex:1; }
+  .lastone-title{ font-family:'Jua', sans-serif; color: #f1cf8f; font-size: 13px; letter-spacing:0.03em; }
+  .lastone-desc{ color: rgba(255,250,240,0.82); font-size: 12px; margin-top: 3px; }
+  .lastone-card.pending{ opacity:.6; pointer-events:none; }
+
+  @media (prefers-reduced-motion: reduce){
+    .cell-inner, .cell.shake .cell-inner{ transition:none; animation:none; }
+    .burst-dot{ display:none; }
+  }
+
+  /* ---------- draw log ---------- */
+  .log-list{ display:flex; flex-direction:column; gap:6px; margin: 4px 0 10px; max-height: 220px; overflow-y:auto; }
+  .log-row{ display:flex; align-items:baseline; gap:8px; font-size: 12px; color: var(--ink); padding: 6px 8px; border-radius: 8px; background: var(--cream); }
+  .log-idx{ color: var(--ink-soft); font-variant-numeric: tabular-nums; flex:none; }
+  .log-rank{ font-weight:700; flex:none; }
+  .log-prize{ flex:1; color: var(--ink-soft); }
+  .log-time{ color: var(--ink-soft); font-size: 10.5px; flex:none; }
+  .empty-note{ color: var(--ink-soft); font-size: 12.5px; }
+
+  .footer-note{ text-align:center; color: var(--ink-soft); font-size: 11px; margin-top: 20px; line-height:1.7; position:relative; z-index:1; }
+
+  #toastLayer{
+    position: fixed; left:50%; bottom: 18px; transform: translateX(-50%);
+    display:flex; flex-direction:column; gap:8px; z-index: 50; width: min(90vw, 380px); pointer-events:none;
+  }
+  .toast{
+    background: var(--ink); color: var(--paper); font-size: 12.5px;
+    padding: 9px 14px; border-radius: 10px; box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+    animation: toastIn .25s ease-out, toastOut .35s ease-in 2.1s forwards; text-align:center;
+  }
+  @keyframes toastIn{ from{ opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
+  @keyframes toastOut{ to{ opacity:0; transform:translateY(-6px);} }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div id="setupBanner"></div>
+
+  <header class="poster">
+    <div class="toolbar">
+      <button class="icon-btn" id="muteBtn" type="button" aria-pressed="false" aria-label="효과음 끄기">🔊</button>
+      <button class="icon-btn" id="adminToggleBtn" type="button" aria-label="관리자 로그인">🔑</button>
+    </div>
+    <div class="eyebrow">10.05 MYONE BIRTHDAY</div>
+    <h1>묘네 생탄 가챠</h1>
+    <p class="subtitle">캡슐을 하나씩 뽑아 상품을 확인해보세요 · 현황은 실시간으로 갱신돼요</p>
+    <div class="mode-row">
+      <span class="mode-pill" id="modePill">보기 전용</span>
+      <button class="link-btn" id="logoutBtn" type="button" hidden>로그아웃</button>
+    </div>
+    <form class="login-box" id="loginBox" hidden>
+      <div class="row">
+        <input type="email" id="loginEmail" placeholder="관리자 이메일" autocomplete="username" required>
+      </div>
+      <div class="row">
+        <input type="password" id="loginPassword" placeholder="비밀번호" autocomplete="current-password" required>
+      </div>
+      <div class="login-error" id="loginError"></div>
+      <div class="row">
+        <button type="submit" class="btn btn-primary" style="flex:1; font-size:12.5px; padding:8px;">로그인</button>
+        <button type="button" class="btn btn-ghost" id="loginCancelBtn">취소</button>
+      </div>
+    </form>
+  </header>
+
+  <section class="panel">
+    <h2>🎁 상품 구성 &amp; 잔여 현황</h2>
+    <table class="prize-table" id="prizeTable"></table>
+  </section>
+
+  <div class="admin-bar" id="adminBar" hidden></div>
+  <p class="waiting-note" id="waitingNote" hidden>아직 뽑기가 시작되지 않았어요. 진행자가 준비 중이에요.</p>
+
+  <div class="board-wrap">
+    <div class="board" id="board" role="grid" aria-label="가챠 캡슐판, 35칸"></div>
+  </div>
+
+  <div class="lastone-wrap">
+    <button class="lastone-card locked" id="lastOneCard" type="button">
+      <div class="lastone-inner">
+        <span style="font-size:26px" id="lastOneIcon">🎟️</span>
+        <div class="lastone-content">
+          <div class="lastone-title" id="lastOneTitle">LAST ONE</div>
+          <div class="lastone-desc" id="lastOneDesc">스냅촬영 1시간 or 원하는 상품 — 별도 보너스 캡슐</div>
+        </div>
+      </div>
+    </button>
+  </div>
+
+  <section class="panel" style="margin-top:18px;">
+    <h2>📋 뽑기 기록</h2>
+    <div class="log-list" id="logList"><span class="empty-note">아직 뽑힌 캡슐이 없어요.</span></div>
+  </section>
+
+  <p class="footer-note">10.05 묘네 생탄 기념 이벤트 데모 · 진행자만 뽑을 수 있어요<br>이 링크를 열어둔 모두에게 실시간으로 같은 현황이 보여요</p>
+</div>
+
+<div id="toastLayer" aria-live="polite"></div>
+
+<!-- Firebase (compat SDK) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+
+<script>
+(function(){
+  "use strict";
+
+  // ============================================================
+  // 1) Firebase 콘솔 > 프로젝트 설정 > 내 앱 에서 복사한 값으로 바꿔주세요.
+  //    이 값들은 비공개 비밀키가 아니라 공개돼도 되는 설정값이에요.
+  //    (실제 보안은 Firestore 보안 규칙으로 걸려있어요)
+  // ============================================================
+  var firebaseConfig = {
+    apiKey: "AIzaSyBJJfGOmscj8U09AsuP2piW3gTk7A1GRqI",
+    authDomain: "gatcha-c0cb0.firebaseapp.com",
+    projectId: "gatcha-c0cb0",
+    storageBucket: "gatcha-c0cb0.firebasestorage.app",
+    messagingSenderId: "1065575498149",
+    appId: "1:1065575498149:web:e70461c718e992affb684c"
+  };
+
+  var TOTAL = 35;
+  var TIER_COUNTS = { 1:2, 2:4, 3:6, 4:8, 5:15 };
+  var TIER_META = {
+    1: { name:"1등", color:"var(--t1)", desc:"인생네컷 + 손편지 + 키링 + 포토카드" },
+    2: { name:"2등", color:"var(--t2)", desc:"하루종일 디엠권 or 1시간 통화 + 체키 1장" },
+    3: { name:"3등", color:"var(--t3)", desc:"시크릿 포토카드 + 미니편지 + 체키 1장" },
+    4: { name:"4등", color:"var(--t4)", desc:"포토카드 + 미니편지" },
+    5: { name:"5등", color:"var(--t5)", desc:"샤메 / 영상샤메" }
+  };
+  var TIER5_VARIANT = { a:"샤메", b:"영상샤메" };
+  var LASTONE_META = { name:"LAST ONE", color:"var(--tlast-b)", desc:"스냅촬영 1시간 or 원하는 상품" };
+  var DEFAULT_STATE = { seeded:false, cells:[], lastOne:{revealed:false}, drawLog:[] };
+
+  function buildPool(){
+    var pool = [];
+    function push(tier, n, variant){ for (var i=0;i<n;i++) pool.push({ tier:tier, variant: variant || null }); }
+    push(1,2); push(2,4); push(3,6); push(4,8);
+    push(5,8,'a'); push(5,7,'b');
+    return pool;
+  }
+  function shuffle(arr){
+    var a = arr.slice();
+    for (var i=a.length-1;i>0;i--){
+      var j = Math.floor(Math.random()*(i+1));
+      var t=a[i]; a[i]=a[j]; a[j]=t;
+    }
+    return a;
+  }
+  function prizeLabel(tier, variant){
+    if(tier === 5) return TIER5_VARIANT[variant] || TIER_META[5].desc;
+    return TIER_META[tier].desc;
+  }
+  function rankLabel(tier){ return TIER_META[tier].name; }
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+    });
+  }
+  function formatTime(ts){
+    try{ return new Date(ts).toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'}); }
+    catch(e){ return ''; }
+  }
+
+  var prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var muted = false;
+
+  function playPop(){
+    if(muted || prefersReducedMotion) return;
+    try{
+      var ctx = new (window.AudioContext || window.webkitAudioContext)();
+      var o = ctx.createOscillator();
+      var g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = 'triangle';
+      o.frequency.setValueAtTime(600, ctx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(1400, ctx.currentTime + 0.08);
+      g.gain.setValueAtTime(0.14, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+      o.start(); o.stop(ctx.currentTime + 0.26);
+      setTimeout(function(){ try{ ctx.close(); }catch(e){} }, 400);
+    }catch(e){}
+  }
+
+  function burst(cellInnerEl, color){
+    if(prefersReducedMotion) return;
+    var n = 8;
+    for (var i=0;i<n;i++){
+      var dot = document.createElement('span');
+      dot.className = 'burst-dot';
+      var angle = (Math.PI*2/n)*i + (Math.random()*0.4-0.2);
+      var dist = 22 + Math.random()*10;
+      dot.style.setProperty('--dx', (Math.cos(angle)*dist)+'px');
+      dot.style.setProperty('--dy', (Math.sin(angle)*dist)+'px');
+      if(color) dot.style.background = color;
+      cellInnerEl.appendChild(dot);
+      (function(d){ setTimeout(function(){ d.remove(); }, 600); })(dot);
+    }
+  }
+
+  function showToast(msg){
+    var layer = document.getElementById('toastLayer');
+    var t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = msg;
+    layer.appendChild(t);
+    setTimeout(function(){ t.remove(); }, 2500);
+  }
+
+  // ---------- state ----------
+  var STATE = DEFAULT_STATE;
+  var lastAppliedStateJson = JSON.stringify(DEFAULT_STATE);
+  var canDraw = false;
+  var boardRef = null;
+
+  // ---------- render: pieces ----------
+  function renderPrizeTable(){
+    var rows = [1,2,3,4,5].map(function(t){
+      var total = TIER_COUNTS[t];
+      var remain = total;
+      if(STATE.seeded){
+        remain = STATE.cells.filter(function(c){ return c.tier === t && !c.revealed; }).length;
+      }
+      return '<tr><td><span class="rank-cell"><span class="rank-dot" style="background:'+TIER_META[t].color+'"></span>'+TIER_META[t].name+'</span></td>' +
+        '<td class="prize-desc">'+escapeHtml(TIER_META[t].desc)+'</td>' +
+        '<td class="remain-cell"><b>'+remain+'</b> / '+total+'</td></tr>';
+    });
+    var lastRemain = STATE.lastOne && STATE.lastOne.revealed ? '완료' : '대기중';
+    rows.push('<tr><td><span class="rank-cell"><span class="rank-dot" style="background:'+LASTONE_META.color+'"></span>LAST ONE</span></td>' +
+      '<td class="prize-desc">'+escapeHtml(LASTONE_META.desc)+'</td>' +
+      '<td class="remain-cell">'+lastRemain+'</td></tr>');
+    document.getElementById('prizeTable').innerHTML = rows.join('');
+  }
+
+  function renderModePill(){
+    var pill = document.getElementById('modePill');
+    var logoutBtn = document.getElementById('logoutBtn');
+    if(canDraw){ pill.textContent = '🔑 진행자 모드'; pill.classList.add('admin'); logoutBtn.hidden = false; }
+    else { pill.textContent = '보기 전용'; pill.classList.remove('admin'); logoutBtn.hidden = true; }
+    document.getElementById('adminToggleBtn').classList.toggle('on', canDraw);
+  }
+
+  function renderAdminBar(){
+    var bar = document.getElementById('adminBar');
+    var waiting = document.getElementById('waitingNote');
+    if(!canDraw){ bar.hidden = true; waiting.hidden = STATE.seeded; return; }
+    bar.hidden = false;
+    waiting.hidden = true;
+    if(!STATE.seeded){
+      bar.innerHTML = '<button class="btn btn-primary" id="seedBtn">🎲 상품 섞고 시작하기</button>';
+      document.getElementById('seedBtn').addEventListener('click', doSeed);
+    } else {
+      bar.innerHTML = '<button class="btn btn-ghost" id="resetBtn">⟲ 판 초기화 (다시 섞기)</button>';
+      document.getElementById('resetBtn').addEventListener('click', doResetConfirm);
+    }
+  }
+
+  var resetArmed = false;
+  function doResetConfirm(){
+    var btn = document.getElementById('resetBtn');
+    if(!resetArmed){
+      resetArmed = true;
+      btn.textContent = '정말 초기화할까요? 다시 누르면 전부 지워져요';
+      setTimeout(function(){ resetArmed = false; if(btn && btn.isConnected) btn.textContent = '⟲ 판 초기화 (다시 섞기)'; }, 3000);
+      return;
+    }
+    resetArmed = false;
+    doSeed();
+  }
+
+  function renderBoard(){
+    var board = document.getElementById('board');
+    board.innerHTML = '';
+    var cells = STATE.cells || [];
+    for (var i=0;i<TOTAL;i++){
+      var c = cells[i];
+      var btn = document.createElement('button');
+      btn.className = 'cell' + (c && c.revealed ? ' revealed' : '') + (!canDraw || !c || c.revealed ? ' locked' : '');
+      btn.type = 'button';
+
+      var backNum = STATE.seeded ? (i+1) : '';
+      var frontRank = '', frontPrize = '', tierColor = 'var(--t5)';
+      if(c && c.revealed){
+        frontRank = rankLabel(c.tier);
+        frontPrize = prizeLabel(c.tier, c.variant);
+        tierColor = TIER_META[c.tier].color;
+      }
+      btn.style.setProperty('--tier-color', tierColor);
+      btn.innerHTML =
+        '<span class="cell-inner">' +
+          '<span class="face back"><span class="num">'+backNum+'</span></span>' +
+          '<span class="face front"><span class="rank">'+escapeHtml(frontRank)+'</span><span class="prize">'+escapeHtml(frontPrize)+'</span></span>' +
+        '</span>';
+      btn.setAttribute('aria-label', c && c.revealed ? ((i+1)+'번 캡슐, '+frontRank+' 당첨') : ((i+1)+'번 캡슐, 아직 뽑지 않음'));
+
+      if(canDraw && STATE.seeded && c && !c.revealed){
+        (function(idx, el){ el.addEventListener('click', function(){ drawCell(idx, el); }); })(i, btn);
+      }
+      board.appendChild(btn);
+    }
+  }
+
+  function renderLastOneCard(){
+    var card = document.getElementById('lastOneCard');
+    var titleEl = document.getElementById('lastOneTitle');
+    var descEl = document.getElementById('lastOneDesc');
+    var iconEl = document.getElementById('lastOneIcon');
+    var lo = STATE.lastOne || { revealed:false };
+
+    var clickable = canDraw && STATE.seeded && !lo.revealed;
+    card.classList.toggle('locked', !clickable);
+
+    if(lo.revealed){
+      titleEl.textContent = '🎉 LAST ONE 당첨!';
+      descEl.textContent = LASTONE_META.desc;
+      iconEl.textContent = '🏆';
+    } else {
+      titleEl.textContent = 'LAST ONE';
+      descEl.textContent = LASTONE_META.desc + ' — 별도 보너스 캡슐';
+      iconEl.textContent = '🎟️';
+    }
+    card.onclick = clickable ? function(){ drawLastOne(card); } : null;
+  }
+
+  function renderLog(){
+    var el = document.getElementById('logList');
+    var log = (STATE.drawLog || []).slice().reverse();
+    if(log.length === 0){
+      el.innerHTML = '<span class="empty-note">아직 뽑힌 캡슐이 없어요.</span>';
+      return;
+    }
+    el.innerHTML = log.map(function(entry){
+      var rank = entry.kind === 'lastone' ? 'LAST ONE' : rankLabel(entry.tier);
+      var prize = entry.kind === 'lastone' ? LASTONE_META.desc : prizeLabel(entry.tier, entry.variant);
+      var color = entry.kind === 'lastone' ? LASTONE_META.color : TIER_META[entry.tier].color;
+      return '<div class="log-row"><span class="log-idx">#'+entry.seq+'</span>' +
+        '<span class="log-rank" style="color:'+color+'">'+escapeHtml(rank)+'</span>' +
+        '<span class="log-prize">'+escapeHtml(prize)+'</span>' +
+        '<span class="log-time">'+formatTime(entry.at)+'</span></div>';
+    }).join('');
+  }
+
+  function renderAll(){
+    renderPrizeTable();
+    renderModePill();
+    renderAdminBar();
+    renderBoard();
+    renderLastOneCard();
+    renderLog();
+  }
+  function renderPartial(){
+    renderPrizeTable();
+    renderLog();
+  }
+
+  // ---------- writes ----------
+  function writeState(newState, prevState){
+    lastAppliedStateJson = JSON.stringify(newState);
+    STATE = newState;
+    if(!boardRef){ showToast('연결이 준비되지 않았어요.'); return; }
+    boardRef.set(newState).catch(function(){
+      showToast('저장에 실패했어요. 다시 로그인하거나 새로고침 해주세요.');
+      lastAppliedStateJson = JSON.stringify(prevState);
+      STATE = prevState;
+      renderAll();
+    });
+  }
+
+  function doSeed(){
+    var prev = STATE;
+    var pool = shuffle(buildPool());
+    var cells = pool.map(function(p){ return { tier:p.tier, variant:p.variant, revealed:false }; });
+    var newState = { seeded:true, cells: cells, lastOne: { revealed:false }, drawLog: [] };
+    writeState(newState, prev);
+    renderAll();
+  }
+
+  function drawCell(idx, el){
+    var c = STATE.cells[idx];
+    if(!c || c.revealed) return;
+    var prev = STATE;
+
+    var newCells = STATE.cells.map(function(cell, i){
+      if(i !== idx) return cell;
+      return { tier: cell.tier, variant: cell.variant, revealed:true, revealedAt: Date.now() };
+    });
+    var entry = { seq: (STATE.drawLog.length + 1), kind:'cell', idx: idx, tier: c.tier, variant: c.variant, at: Date.now() };
+    var newState = { seeded:true, cells:newCells, lastOne: STATE.lastOne, drawLog: STATE.drawLog.concat([entry]) };
+
+    var tierColor = TIER_META[c.tier].color;
+    el.style.setProperty('--tier-color', tierColor);
+    el.querySelector('.face.front .rank').textContent = rankLabel(c.tier);
+    el.querySelector('.face.front .prize').textContent = prizeLabel(c.tier, c.variant);
+    el.classList.remove('locked');
+    el.classList.add('revealed');
+    el.setAttribute('aria-label', (idx+1)+'번 캡슐, '+rankLabel(c.tier)+' 당첨');
+    burst(el.querySelector('.cell-inner'), tierColor);
+    playPop();
+
+    writeState(newState, prev);
+    renderPartial();
+  }
+
+  function drawLastOne(card){
+    if(STATE.lastOne && STATE.lastOne.revealed) return;
+    var prev = STATE;
+    var entry = { seq: (STATE.drawLog.length + 1), kind:'lastone', at: Date.now() };
+    var newState = { seeded:true, cells: STATE.cells, lastOne: { revealed:true, revealedAt: Date.now() }, drawLog: STATE.drawLog.concat([entry]) };
+
+    document.getElementById('lastOneTitle').textContent = '🎉 LAST ONE 당첨!';
+    document.getElementById('lastOneDesc').textContent = LASTONE_META.desc;
+    document.getElementById('lastOneIcon').textContent = '🏆';
+    card.classList.add('locked');
+    card.onclick = null;
+    burst(card.querySelector('.lastone-inner'), LASTONE_META.color);
+    playPop();
+
+    writeState(newState, prev);
+    renderPartial();
+  }
+
+  // ---------- admin login UI ----------
+  function wireLoginUI(auth){
+    var toggleBtn = document.getElementById('adminToggleBtn');
+    var loginBox = document.getElementById('loginBox');
+    var loginForm = loginBox;
+    var errorEl = document.getElementById('loginError');
+    var cancelBtn = document.getElementById('loginCancelBtn');
+    var logoutBtn = document.getElementById('logoutBtn');
+
+    toggleBtn.addEventListener('click', function(){
+      if(canDraw) return;
+      loginBox.hidden = !loginBox.hidden;
+      errorEl.textContent = '';
+    });
+    cancelBtn.addEventListener('click', function(){ loginBox.hidden = true; errorEl.textContent = ''; });
+    logoutBtn.addEventListener('click', function(){ auth.signOut(); });
+
+    loginForm.addEventListener('submit', function(e){
+      e.preventDefault();
+      var email = document.getElementById('loginEmail').value.trim();
+      var pw = document.getElementById('loginPassword').value;
+      errorEl.textContent = '로그인 중...';
+      auth.signInWithEmailAndPassword(email, pw).then(function(){
+        loginBox.hidden = true;
+        errorEl.textContent = '';
+      }).catch(function(err){
+        errorEl.textContent = '로그인 실패: 이메일/비밀번호를 확인해주세요.';
+      });
+    });
+  }
+
+  // ---------- init ----------
+  function isConfigReady(){
+    return firebaseConfig.apiKey && firebaseConfig.apiKey.indexOf('YOUR_') !== 0;
+  }
+
+  function init(){
+    document.getElementById('muteBtn').addEventListener('click', function(){
+      muted = !muted;
+      this.textContent = muted ? '🔇' : '🔊';
+      this.setAttribute('aria-pressed', String(muted));
+      this.setAttribute('aria-label', muted ? '효과음 켜기' : '효과음 끄기');
+    });
+
+    if(!isConfigReady()){
+      document.getElementById('setupBanner').innerHTML =
+        '<div class="setup-banner">⚙️ 아직 Firebase 연결 전이에요. 코드 상단의 <code>firebaseConfig</code> 값을 본인 프로젝트 값으로 채워주세요. ' +
+        '그 전까지는 화면만 미리 보이고, 저장/실시간 공유는 동작하지 않아요.</div>';
+      renderAll();
+      return;
+    }
+
+    firebase.initializeApp(firebaseConfig);
+    var auth = firebase.auth();
+    var db = firebase.firestore();
+    boardRef = db.collection('board').doc('main');
+    wireLoginUI(auth);
+
+    auth.onAuthStateChanged(function(user){
+      canDraw = !!user;
+      renderAll();
+    });
+
+    boardRef.onSnapshot(function(snap){
+      var data = snap.exists ? snap.data() : DEFAULT_STATE;
+      var json = JSON.stringify(data);
+      if(json === lastAppliedStateJson) return;
+      lastAppliedStateJson = json;
+      STATE = data;
+      renderAll();
+    }, function(){
+      showToast('실시간 연결에 문제가 있어요. 새로고침 해보세요.');
+    });
+
+    renderAll();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
